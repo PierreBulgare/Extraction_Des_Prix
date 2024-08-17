@@ -51,6 +51,6 @@ class Category:
         return books
 
     def add_books_to_csv(self):
-        # Ajouter tous les livres à data.csv
+        # Ajouter tous les livres au fichier csv
         for book in self.books:
             book.add_to_csv()

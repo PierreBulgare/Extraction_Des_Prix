@@ -23,7 +23,7 @@ Vous aurez le choix entre deux options:
     2. Extraire et enregistrer les données de tous les livres d'une catégorie
 
 * **Charge les données dans Excel**\
-Pour charger les données du fichier `data.csv`:
+Pour charger les données du fichier CSV:
     * Ouvrez un nouveau fichier Excel
     * Cliquez sur l'onglet "Données", puis "À partir d'un fichier text/csv"
     * Vérifiez que les données s'affichent sous forme de tableau, puis cliquez sur "Charger"

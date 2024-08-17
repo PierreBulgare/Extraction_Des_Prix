@@ -1,7 +1,7 @@
 # Extraction des prix (Books to Scrape)
 
 ## Informations sur la version
-Version 0.2.0\
+Version 0.2.1\
 Date: 17/08/2024\
 Auteur: Pierre BULGARE
 

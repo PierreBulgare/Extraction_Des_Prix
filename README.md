@@ -1,12 +1,12 @@
 # Extraction des prix (Books to Scrape)
 
 ## Informations sur la version
-Version 0.1.0\
-Date: 16/08/2024\
+Version 0.2.0\
+Date: 17/08/2024\
 Auteur: Pierre BULGARE
 
 ## Description
-Ce programme, dans sa version actuelle, permet d'extraire les données du livre `It` de `Stephen King` sur le site [Books To Scrap](https://books.toscrape.com).\
+Ce programme, dans sa version actuelle, permet d'extraire les données d'un livre ou tous les livres d'une catégorie prédéfinie sur le site [Books To Scrap](https://books.toscrape.com).\
 Les données sont ensuite enregistrées dans un fichier CSV généré par le script.
 
 ## Mode d'emploi
@@ -16,8 +16,13 @@ Les données sont ensuite enregistrées dans un fichier CSV généré par le scr
         * `beautifulsoup4` 4.12.3
         * `requests` 2.32.3
     
-* **Utilisation**\
+* **Utilisation du script**\
 Pour utiliser le programme, lancez le fichier `launch.bat`. Ce fichier vérifiera les packages et les installera automatiquement si nécessaire, puis il exécutera le script `main.py`. ***\
+Vous aurez le choix entre deux options:
+    1. Extraire et enregistrer les données d'un livre
+    2. Extraire et enregistrer les données de tous les livres d'une catégorie
+
+* **Charge les données dans Excel**\
 Pour charger les données du fichier `data.csv`:
     * Ouvrez un nouveau fichier Excel
     * Cliquez sur l'onglet "Données", puis "À partir d'un fichier text/csv"
@@ -33,7 +38,6 @@ Pour charger les données du fichier `data.csv`:
     * La catégorie du produit
     * La note du produit
     * L'URL de l'image du livre
-
 
 ## Contacts
 Si vous avez le moindre doute ou rencontrez une erreur lors de l'exécution du programme, n'hésitez pas à me contacter.

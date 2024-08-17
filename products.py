@@ -6,9 +6,12 @@ from packages.file_creator import FileCreator
 class Product:
     def __init__(self, url):
         self.url = url
-        self.data_list = self.get_data_list(Extractor.get_html_content(url))
+        self.soup = Extractor.get_html_content(url)
+        self.data_list = self.get_data_list()
+        if self.data_list is not None:
+            self.name = self.data_list[2]
 
-    def get_data_list(self, soup):
+    def get_data_list(self):
         """Récupération des données du produit
 
         Args:
@@ -18,29 +21,29 @@ class Product:
             List: Retourne une liste contenant les données du produit (URL, UPC, Titre, Prix, Stock disponible, description, catégorie, note, URL de l'image)
         """
         # Si la requête HTTP n'a pas fonctionné
-        if soup is None:
+        if self.soup is None:
             return
         
         # Si la requête HTTP a fonctionné
         try:
             # Extraction du titre du produit
-            title = Extractor.extract_title(soup)
+            title = Extractor.extract_title(self.soup)
             logging.info(f"Extraction des données du livre [{title}]")
 
             # Extraction de l'url de l'image du produit
-            image_url = Extractor.extract_image_url(soup, title)
+            image_url = Extractor.extract_image_url(self.soup, title)
 
             # Extraction de la catégorie du produit
-            category = Extractor.extract_category(soup)
+            category = Extractor.extract_category(self.soup)
 
             # Extraction de la note du produit
-            rating = Extractor.extract_rating(soup)
+            rating = Extractor.extract_rating(self.soup)
 
             # Extraction de la description du produit
-            description = Extractor.extract_description(soup)
+            description = Extractor.extract_description(self.soup)
 
             # Extraction des informations sur le produit (UPC, Type du produit, Prix avec et sans taxe, Stock)
-            product_informations = Extractor.extract_informations(soup)
+            product_informations = Extractor.extract_informations(self.soup)
 
             upc = product_informations["UPC"]
             price_including_tax = product_informations["Price (incl. tax)"]
@@ -56,4 +59,6 @@ class Product:
             return None
     
     def add_to_csv(self):
+        if not FileCreator.FILE:
+            FileCreator.name_file()
         FileCreator.update_csv(self.data_list)

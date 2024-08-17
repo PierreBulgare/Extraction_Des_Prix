@@ -1,14 +1,21 @@
 import csv
-from settings import logging, os
+from settings import logging, os, re, datetime
 
 class FileCreator:
     # Fichier
-    FILE = "data.csv"
+    FILE = ""
     # En-tête
     HEADER = ["product_page_url", "universal_ product_code (upc)", "title", "price_including_tax", 
             "price_excluding_tax", "number_available", "product_description", "category", "review_rating",
             "image_url"
             ]
+    
+    @staticmethod
+    def name_file(name):
+        name = re.sub(r"[ ',]", "_", name)
+        name = re.sub(r"[:.?!]", "", name)
+        date_time = datetime.now().strftime("%d-%m-%Y_%Hh-%M-")
+        FileCreator.FILE = f"{name}--BooksToScrape_datas--{date_time}.csv"
 
     @staticmethod
     def load_upcs():
@@ -27,22 +34,22 @@ class FileCreator:
 
     @staticmethod
     def create_csv():
-        """Crée un fichier data.csv s'il n'existe pas
+        """Crée un fichier csv s'il n'existe pas
         """
         # Vérifier si le fichier existe
         if not os.path.exists(FileCreator.FILE):
-            # Si data.csv n'existe pas, création du fichier avec l'en-tête
+            # Si le fichier csv n'existe pas, création du fichier avec l'en-tête
             with open(FileCreator.FILE, "w", encoding="utf-8", newline="") as csv_file:
                 writer = csv.writer(csv_file, delimiter=",")
                 writer.writerow(FileCreator.HEADER)  # Écrire l'en-tête si le fichier n'existe pas
                 return
             
         # Si le fichier n'existe pas
-        logging.warning("Le fichier data.csv existe déjà !")
+        logging.warning(f"Le fichier {FileCreator.FILE} existe déjà !")
 
     @staticmethod
     def update_csv(product_datas):
-        """Ajoute les données d'un produit dans un fichier CSV (data.csv).
+        """Ajoute les données d'un produit dans un fichier CSV.
 
         Args:
             datas (List): Liste des données du produit à intégrer au CSV.
@@ -53,10 +60,10 @@ class FileCreator:
             upcs = FileCreator.load_upcs()  # Chargement des UPC depuis le fichier
             # Vérifier si l'UPC du produit est déjà présent
             if product_datas[1] in upcs:
-                logging.warning(f"Le livre {book_title} est déjà présent dans le fichier data.csv.")
+                logging.warning(f"Le livre {book_title} est déjà présent dans le fichier {FileCreator.FILE}")
                 return # Arrêter la fonction si le produit existe déjà
         else:
-            # Si data.csv n'existe pas, création du fichier avec l'en-tête
+            # Si le fichier csv n'existe pas, création du fichier avec l'en-tête
             FileCreator.create_csv()
 
         # Ajouter les données du produit au fichier
@@ -64,5 +71,5 @@ class FileCreator:
             writer = csv.writer(csv_file, delimiter=",")
             writer.writerow(product_datas)  # Écrire les données du produit
 
-        logging.info(f"Le livre {book_title} a été ajouté au fichier data.csv.")
+        logging.info(f"Le livre {book_title} a été ajouté au fichier {FileCreator.FILE}")
         print(f"Enregistrement des données du livre {book_title} réussi !")

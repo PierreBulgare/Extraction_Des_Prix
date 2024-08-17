@@ -1,4 +1,5 @@
 from settings import logging
+from packages.file_creator import FileCreator
 from categories import Category
 from products import Product
 
@@ -34,6 +35,7 @@ if data_to_extract == 1:
     product = Product(url)  # Création d'une instance de la classe Produit à partir de l'url fournie par l'utilisateur
     # Enregistre les données du produit dans un fichier CSV si les données ont bien été extraites
     if product.data_list:
+        FileCreator.name_file(product.name+"--Book")
         product.add_to_csv()
 
 # Extrait et enregistre les données de tous les produits d'une catégorie
@@ -42,4 +44,5 @@ elif data_to_extract == 2:
     category = Category(url)  # Création d'une instance de la classe Category à partir de l'url fournie par l'utilisateur
     # Enregistre les données de tous les produits dans un fichier CSV si les livres ont bien été trouvés
     if category.books is not None:
+        FileCreator.name_file(category.name+"--Category")
         category.add_books_to_csv()

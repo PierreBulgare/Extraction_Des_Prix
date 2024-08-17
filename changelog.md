@@ -1,4 +1,11 @@
 # Change Log
+## [Version 0.2.1] - 17/08/2024
+### Modifications
+- **Nommage du fichier de données** : Ajout de la date, l'heure et le nom du produit ou de la catégorie dans le nom du fichier CSV.
+
+### Corrections
+- Correction de bugs mineurs sur la gestion des erreurs inscrites dans le fichier log.log
+
 ## [Version 0.2.0] -  17/08/2024
 
 ### Ajout de fonctionnalités

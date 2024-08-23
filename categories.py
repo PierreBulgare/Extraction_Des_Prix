@@ -1,6 +1,7 @@
 from settings import logging, math, display_default_error_message
 from packages.extractor import Extractor
 from products import Product
+from packages.file_creator import FileCreator
 
 class Category:
     def __init__(self, url):

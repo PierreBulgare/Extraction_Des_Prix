@@ -1,9 +1,93 @@
 import requests
 from bs4 import BeautifulSoup
 from packages.converter import convert_rating
-from settings import logging, display_default_error_message
+from settings import logging, display_default_error_message, BTS_URL
+from urllib.parse import urlparse
 
 class Extractor:
+    @staticmethod
+    def get_extraction_method()-> dict:
+        """
+            Retourne le mode d'extraction sélectionné
+
+            1. Extraction d'un livre (One Book)
+            2. Les données de tous les livres d'une catégorie (One Category)
+            3. Les données de toutes les catégories de livres (All Categories)
+        
+        """
+        url = None
+
+        def validate_url(url, choice) -> str|None:
+            """Valide et retourne l'URL si elle est correcte, sinon retourne None"""
+            parsed_url = urlparse(url) # Retourne les composants de l'URL
+            
+            # Si le schéma de l'URL est vide (Absence de http ou https)
+            if not parsed_url.scheme:
+                url = "https://" + url # Ajoute le préfixe https:// devant l'URL
+
+            # Si l'URL ne provient pas du site Books to Scrape
+            if "books.toscrape.com" != parsed_url.netloc:
+                print("Cette URL n'appartient pas à Books to Scrape. Recommencez!")
+                return None
+            
+            # Si la méthode choisi est 1 (Données d'un livre) et que l'URL appartient à une catégorie
+            if choice == 1 and "/catalogue/category/books/" in parsed_url.path:
+                print("Cet URL appartient à une catégorie, vous devez entrer une URL appartenant à un livre.")
+            
+            # Si la méthode choisi est 2 (Données des livre d'une catégorie) et que l'URL n'appartient pas à une catégorie
+            if choice == 2 and "/catalogue/category/books/" not in parsed_url.path:
+                print("L'URL de la catégorie n'est pas correcte. Recommencez !")
+                return None
+            
+            return url # Retourne l'URL si elle est correcte
+            
+
+        # Boucle principale pour sélectionner le mode d'extraction
+        while True:
+            try:
+                # Demande de choisir le mode d'extraction
+                choice = int(input("""
+                Que voulez-vous extraire sur Books to Scrape ?
+                    1. Les données d'un livre
+                    2. Les données de tous les livres d'une catégorie
+                    3. Les données de toutes les catégories de livres
+                    4. Quitter le programme
+                """))
+                
+                # Si le choix est "4. Quitter le programme"
+                if choice == 4:
+                    quit() # Quitter le programme
+                
+                # Si le choix est dans la rangée des choix autorisées (Entre 1 et 3)
+                if 1 <= choice <= 3:
+                    # Si le choix est "3. Les données de toutes les catégories de livres"
+                    if choice == 3:
+                        return {"Mode": "All Categories", "URL": BTS_URL}
+                    # Sinon, si le choix est "1. Les données d'un livre ou 2. Les données de tous les livres d'une catégorie"
+                    else:
+                        complement = "du livre" if choice == 1 else "de la catégorie" # Formatage du texte de url_input
+
+                        # Boucle de vérification de l'URL fournie
+                        while url is None:
+                            # Choix de l'URL (Livre ou Catégorie)
+                            url_input = input(f"Copiez l'URL de la page {complement} de votre choix ou tapez ANNULER pour retourner au menu principal et appuyez sur entrée: ")
+                            
+                            # Retour au menu principal en cas d'annulation
+                            if url_input.upper() == "ANNULER":
+                                break
+
+                            if url_input:
+                                url = validate_url(url_input, choice)
+                            else:
+                                print("Vous n'avez pas entré d'URL.")
+                        if url is not None:
+                            return {"Mode": "One Book" if choice == 1 else "One Category", "URL": url}
+                else:
+                    print("Vous n'avez pas entré un choix correct. Recommencez !")
+
+            except ValueError:
+                print("Veuillez entrer un choix valide ...")
+            
     @staticmethod
     def extract_title(soup):
         # Extraction du titre du produit
@@ -20,7 +104,6 @@ class Extractor:
         except:
             logging.error("Impossible de récupérer l'url de l'image du livre.")
 
-
     @staticmethod
     def extract_category(soup):
         # Extraction de la catégorie du produit
@@ -28,6 +111,17 @@ class Extractor:
             return soup.find("ul", class_="breadcrumb").find_all("li")[-2].find("a").string
         except:
             logging.error("Impossible de récupérer le catégorie du livre.")
+
+    def extract_all_categories_url(soup):
+        # Extraction des url de toutes les catégories du site
+        urls = []
+        try:
+            all_li = soup.find("div", class_="side_categories").find_next("li").find("ul").find_all("li")
+            for li in all_li:
+                urls.append(f"{BTS_URL}{li.find('a')['href']}")
+            return urls
+        except:
+            logging.error("Impossible de récupérer les urls des catégories du site.")
 
     @staticmethod
     def extract_rating(soup):

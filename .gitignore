@@ -1,1 +1,8 @@
+# Exclusion des dossiers __pycache__
 __pycache__/
+# Exclusion de l'environnement
+env/
+# Exclusion du dossier Donnees (Qui contient les extractions)
+Donnees/
+# Exclusion des logs
+*.log

@@ -1,46 +1,58 @@
 import csv
-from settings import logging, os, re, datetime
+import re
+from datetime import datetime
+from settings import logging, os
 
 class FileCreator:
-    # Fichier
+    # Variable qui va contenir le chemin du fichier CSV
     FILE = ""
-    # En-tête
+    # Liste des champs de l'en-tête du fichier CSV
     HEADER = ["product_page_url", "universal_ product_code (upc)", "title", "price_including_tax", 
             "price_excluding_tax", "number_available", "product_description", "category", "review_rating",
             "image_url"
             ]
     
     @staticmethod
-    def name_file(name):
+    def name_file(name, folder):
+        """Nommage le fichier CSV"""
+        date = datetime.now().strftime("%d-%m-%Y") # Date d'exécution du programme
+        time = datetime.now().strftime("%H-%M") # Heure d'extraction du fichier CSV
+        
+        # Dossier de destination
+        destination_folder = f"Donnees/Par_{folder}/{date}"
+
+        # Création du dossier de destination s'il n'existe pas
+        if not os.path.exists(destination_folder):
+            os.makedirs(destination_folder)
+        # Supprimer les caractères spéciaux et remplace les espaces, virgules et aspostrophes en underscore dans le nom du fichier CSV
         name = re.sub(r"[ ',]", "_", name)
         name = re.sub(r"[:.?!]", "", name)
-        date_time = datetime.now().strftime("%d-%m-%Y_%Hh-%M-")
-        FileCreator.FILE = f"{name}--BooksToScrape_datas--{date_time}.csv"
+        FileCreator.FILE = f"{destination_folder}/{name}--{time}.csv" # Assignation du nom final du fichier CSV à la variable FILE
 
     @staticmethod
-    def load_upcs():
-        """Chargement de tous les UPC (Qui sont uniques pour chaque produit)
+    def load_upcs()-> set:
+        """Charge tous les UPC (Qui sont uniques pour chaque produit)
 
         Returns:
-            set: Set de tous les UPC précent dans le fichier csv
+            set: Set de tous les UPC précent dans le fichier CSV
         """
         upcs = set()
         if os.path.isfile(FileCreator.FILE):
-            with open(FileCreator.FILE, "r", encoding="utf-8") as csv_file:
-                reader = csv.DictReader(csv_file)
+            with open(FileCreator.FILE, "r", encoding="utf-8") as CSV_file:
+                reader = csv.DictReader(CSV_file)
                 for row in reader:
                     upcs.add(row["universal_ product_code (upc)"])
         return upcs
 
     @staticmethod
     def create_csv():
-        """Crée un fichier csv s'il n'existe pas
+        """Crée un fichier CSV s'il n'existe pas
         """
-        # Vérifier si le fichier existe
+        # Vérifie si le fichier existe
         if not os.path.exists(FileCreator.FILE):
-            # Si le fichier csv n'existe pas, création du fichier avec l'en-tête
-            with open(FileCreator.FILE, "w", encoding="utf-8", newline="") as csv_file:
-                writer = csv.writer(csv_file, delimiter=",")
+            # Si le fichier CSV n'existe pas, création du fichier avec l'en-tête
+            with open(FileCreator.FILE, "w", encoding="utf-8", newline="") as CSV_file:
+                writer = csv.writer(CSV_file, delimiter=",")
                 writer.writerow(FileCreator.HEADER)  # Écrire l'en-tête si le fichier n'existe pas
                 return
             
@@ -63,13 +75,12 @@ class FileCreator:
                 logging.warning(f"Le livre {book_title} est déjà présent dans le fichier {FileCreator.FILE}")
                 return # Arrêter la fonction si le produit existe déjà
         else:
-            # Si le fichier csv n'existe pas, création du fichier avec l'en-tête
+            # Si le fichier CSV n'existe pas, création du fichier avec l'en-tête
             FileCreator.create_csv()
 
         # Ajouter les données du produit au fichier
-        with open(FileCreator.FILE, "a", encoding="utf-8", newline="") as csv_file:
-            writer = csv.writer(csv_file, delimiter=",")
+        with open(FileCreator.FILE, "a", encoding="utf-8", newline="") as CSV_file:
+            writer = csv.writer(CSV_file, delimiter=",")
             writer.writerow(product_datas)  # Écrire les données du produit
 
-        logging.info(f"Le livre {book_title} a été ajouté au fichier {FileCreator.FILE}")
-        print(f"Enregistrement des données du livre {book_title} réussi !")
+        logging.info(f"Le livre {book_title} a été ajouté au fichier {FileCreator.FILE.replace("output/", "")}")

@@ -59,6 +59,4 @@ class Product:
             return None
     
     def add_to_csv(self):
-        if not FileCreator.FILE:
-            FileCreator.name_file()
         FileCreator.update_csv(self.data_list)

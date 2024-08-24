@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from packages.file_creator import FileCreator
 from packages.converter import convert_rating
 from settings import logging, display_default_error_message, BTS_URL
 from urllib.parse import urlparse
@@ -89,30 +90,43 @@ class Extractor:
                 print("Veuillez entrer un choix valide ...")
             
     @staticmethod
-    def extract_title(soup):
+    def extract_title(soup)-> str:
         # Extraction du titre du produit
         try:
             return soup.title.text.split(" |")[0].strip()
         except:
             logging.error("Impossible de récupérer le titre du livre.")
+            return "Titre inconnu"
 
     @staticmethod
-    def extract_image_url(soup, title):
+    def extract_image_url(soup, title)-> str:
         # Extraction de l'url de l'image du produit
         try:
             return soup.find("img", alt=title)["src"].replace("../../", "https://books.toscrape.com/")
         except:
             logging.error("Impossible de récupérer l'url de l'image du livre.")
+            return "Url inconnu"
 
     @staticmethod
-    def extract_category(soup):
+    def download_image(book_name: str, image_url: str):
+        """Télécharge la couverture d'un livre à partir de son url"""
+        image = requests.get(image_url) # Requête à partir de l'url de l'image
+        # Si la requête a réussi
+        if image.status_code == 200:
+            extension = image_url.split(".")[-1] # Récupère l'extension de l'image
+            # Enregistre l'image
+            FileCreator.save_image("Donnees/Images/", f"{FileCreator.format_name(book_name)}.{extension}", image.content)
+
+    @staticmethod
+    def extract_category(soup)-> str:
         # Extraction de la catégorie du produit
         try:
             return soup.find("ul", class_="breadcrumb").find_all("li")[-2].find("a").string
         except:
             logging.error("Impossible de récupérer le catégorie du livre.")
+            return "Catégorie inconnue"
 
-    def extract_all_categories_url(soup):
+    def extract_all_categories_url(soup)-> list:
         # Extraction des url de toutes les catégories du site
         urls = []
         try:
@@ -124,7 +138,7 @@ class Extractor:
             logging.error("Impossible de récupérer les urls des catégories du site.")
 
     @staticmethod
-    def extract_rating(soup):
+    def extract_rating(soup)-> int:
         # Extraction de la note du produit
         try:
             main_div = soup.find("div", class_="product_main") # Extraction du div principal qui contient la note du produit
@@ -132,21 +146,23 @@ class Extractor:
             return convert_rating(rating_text) # Retourne la note au format numérique
         except:
             logging.error("Impossible de récupérer la note du livre.")
+            return 0
 
     @staticmethod
-    def extract_description(soup):
+    def extract_description(soup)-> str:
         # Extraction de la description du produit
         try:
             return soup.find(id="product_description").find_next("p").string
         except:
             logging.error("Impossible de récupérer la description du livre.")
+            return "Pas de description"
 
     @staticmethod
-    def extract_informations(soup):
+    def extract_informations(soup)-> dict:
         # Extraction des informations sur le produit (UPC, Prix avec et sans taxe, Stock disponible)
         try:
             table_rows = soup.find("table").find_all("tr") # Extraction de toutes les lignes du tableau contenant les informations sur le produit
-            product_informations = {} # Initialisation du dictionnaire qui va contenir les informations nécessaires
+            book_informations = {} # Initialisation du dictionnaire qui va contenir les informations nécessaires
             required_informations = ["UPC", "Price (incl. tax)", "Price (excl. tax)", "Availability"] # Informations à récupérer
 
             for row in table_rows:
@@ -156,13 +172,13 @@ class Extractor:
                 value = row.find("td").text # Extraction du contenu de la valeur de l'information
                 if information == "Availability":
                     value = int(value.split("(")[1].split(" available")[0]) # Récupération de la valeur numérique du stock disponible
-                product_informations[information] = value # Ajout dans le dictionnaire (Clé: Nom de l'information, Valeur: Valeur de l'information)
-            return product_informations # Retour le dictionnaire contenant l'UPC, les prix et le stock disponible
+                book_informations[information] = value # Ajout dans le dictionnaire (Clé: Nom de l'information, Valeur: Valeur de l'information)
+            return book_informations # Retour le dictionnaire contenant l'UPC, les prix et le stock disponible
         except:
             logging.error("Impossible de récupérer l'upc, les prix et la disponibilité du livre.")
 
     @staticmethod
-    def get_html_content(url):
+    def get_html_content(url)-> str|None:
         try:
             # Requête HTTP pour récupérer le contenu de la page
             page = requests.get(url)

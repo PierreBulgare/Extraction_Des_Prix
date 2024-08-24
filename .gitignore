@@ -2,7 +2,11 @@
 __pycache__/
 # Exclusion de l'environnement
 env/
+venv/
 # Exclusion du dossier Donnees (Qui contient les extractions)
 Donnees/
 # Exclusion des logs
 *.log
+# Exclusion des fichiers/dossiers compressés
+*.zip
+*.rar

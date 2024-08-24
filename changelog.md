@@ -1,5 +1,10 @@
 # Change Log
 
+## [Version 0.4.0] - 24/08/2024
+
+### Ajout de fonctionnalités
+- **Téléchargement des images de couverture des livres** : Le script peut désormais télécharger localement les images des livres dont les données sont extraites dans le dossier `Donnees/Images`.
+
 ## [Version 0.3.0] - 23/08/2024
 
 ### Ajout de fonctionnalités

@@ -1,28 +1,22 @@
-from settings import BTS_URL, dots_animation
+from settings import BTS_URL, dots_animation, stop_event, animation_thread
 from packages.extractor import Extractor
 from packages.file_creator import FileCreator
 from categories import Category
-from products import Product
+from books import Book
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import threading
 
-# Évènement d'arrêt de l'animation des points
-stop_event = threading.Event()
-
-# Démarre un thread pour afficher les points pendant l'exécution du programme
-animation_thread = threading.Thread(target=dots_animation, kwargs={"display": True, "stop_event": stop_event})
-
+# Récupère le mode d'extraction (Un livre, Une catégorie ou Toutes les catégories)
 extraction_mode = Extractor.get_extraction_method()
 
 # Extrait et enregistre les données d'un seul produit
 if extraction_mode["Mode"] == "One Book":
     print("Extraction des données en cours ...")
 
-    product = Product(extraction_mode["URL"])  # Création d'une instance de la classe Product à partir de l'URL fournie par l'utilisateur
+    book = Book(extraction_mode["URL"])  # Création d'une instance de la classe Book à partir de l'URL fournie par l'utilisateur
     # Enregistre les données du produit dans un fichier CSV si les données ont bien été extraites
-    if product.data_list:
-        FileCreator.name_file(product.name,"Livre")
-        product.add_to_csv()
+    if book.data_list:
+        FileCreator.name_file(book.name,"Livre")
+        book.add_to_csv()
 
 # Extrait et enregistre les données de tous les produits d'une catégorie
 elif extraction_mode["Mode"] == "One Category":
@@ -67,4 +61,4 @@ elif extraction_mode["Mode"] == "All Categories":
     # Arrête l'animation d'affichage des points
     dots_animation(stop=True, thread=animation_thread, stop_event=stop_event)
 
-print("\rExtraction terminée !")
+print("Extraction terminée !")

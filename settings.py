@@ -1,7 +1,7 @@
-import math
 import os
 import logging
 import time
+import threading
 
 # Books To Scrap URL
 BTS_URL = "https://books.toscrape.com/"
@@ -30,6 +30,8 @@ def create_log():
         with open(LOG_FILE, 'w', encoding="utf-8") as log_file:
             pass  # Création d'un fichier log vide
 
+
+# Animations des petits points
 def dots_animation(start = False, stop = False, display = False, thread = None, stop_event = None):
     """Démarre, Arrête ou Exécute l'animation d'affichage de petits points pendant le déroulement du programme"""
     # Démarre l'animation
@@ -48,6 +50,13 @@ def dots_animation(start = False, stop = False, display = False, thread = None, 
         while not stop_event.is_set():  # Continue tant que l'événement d'arrêt n'est pas défini
             print('.', end='', flush=True) # Affiche les points de manière fluide et continue (`flush`` force l'écriture immédiate sur le terminal)
             time.sleep(0.5) # Temps de pause entre l'affiche des points
+
+# Évènement d'arrêt de l'animation des points
+stop_event = threading.Event()
+
+# Démarre un thread pour afficher les points pendant l'exécution du programme
+animation_thread = threading.Thread(target=dots_animation, kwargs={"display": True, "stop_event": stop_event})
+
 
 setup_logging()
 create_log()

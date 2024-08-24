@@ -13,8 +13,23 @@ class FileCreator:
             ]
     
     @staticmethod
+    def create_folder(folder):
+        """ Création de répertoire"""
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+    @staticmethod
+    def format_name(name)-> str:
+        """Supprime les caractères spéciaux et remplace les espaces, virgules et aspostrophes 
+        en underscore dans le nom du fichier"""
+        name = re.sub(r"[ ',/]", "_", name)
+        name = re.sub(r"[*&]", "-", name)
+        name = re.sub(r"[:.?!\"]", "", name)
+        return name
+
+    @staticmethod
     def name_file(name, folder):
-        """Nommage le fichier CSV"""
+        """Nommage des fichiers CSV"""
         date = datetime.now().strftime("%d-%m-%Y") # Date d'exécution du programme
         time = datetime.now().strftime("%H-%M") # Heure d'extraction du fichier CSV
         
@@ -22,12 +37,9 @@ class FileCreator:
         destination_folder = f"Donnees/Par_{folder}/{date}"
 
         # Création du dossier de destination s'il n'existe pas
-        if not os.path.exists(destination_folder):
-            os.makedirs(destination_folder)
-        # Supprimer les caractères spéciaux et remplace les espaces, virgules et aspostrophes en underscore dans le nom du fichier CSV
-        name = re.sub(r"[ ',]", "_", name)
-        name = re.sub(r"[:.?!]", "", name)
-        FileCreator.FILE = f"{destination_folder}/{name}--{time}.csv" # Assignation du nom final du fichier CSV à la variable FILE
+        FileCreator.create_folder(destination_folder)
+
+        FileCreator.FILE = f"{destination_folder}/{FileCreator.format_name(name)}--{time}.csv" # Assignation du nom final du fichier CSV à la variable FILE
 
     @staticmethod
     def load_upcs()-> set:
@@ -43,6 +55,18 @@ class FileCreator:
                 for row in reader:
                     upcs.add(row["universal_ product_code (upc)"])
         return upcs
+        
+    
+    @staticmethod
+    def save_image(destination_folder, image_name, image_content):
+        """Enregistre la couverture d'un livre localement"""
+        # Création du dossier de destination s'il n'existe pas
+        FileCreator.create_folder(destination_folder)
+        try:
+            with open(f"Donnees/Images/{image_name}", "wb") as image_file:
+                image_file.write(image_content)
+        except Exception as e:
+            logging.error(e)
 
     @staticmethod
     def create_csv():
@@ -60,18 +84,18 @@ class FileCreator:
         logging.warning(f"Le fichier {FileCreator.FILE} existe déjà !")
 
     @staticmethod
-    def update_csv(product_datas):
+    def update_csv(book_datas):
         """Ajoute les données d'un produit dans un fichier CSV.
 
         Args:
             datas (List): Liste des données du produit à intégrer au CSV.
         """
-        book_title = product_datas[2]
+        book_title = book_datas[2]
         # Vérifier si le fichier existe
         if os.path.exists(FileCreator.FILE):
             upcs = FileCreator.load_upcs()  # Chargement des UPC depuis le fichier
             # Vérifier si l'UPC du produit est déjà présent
-            if product_datas[1] in upcs:
+            if book_datas[1] in upcs:
                 logging.warning(f"Le livre {book_title} est déjà présent dans le fichier {FileCreator.FILE}")
                 return # Arrêter la fonction si le produit existe déjà
         else:
@@ -81,6 +105,6 @@ class FileCreator:
         # Ajouter les données du produit au fichier
         with open(FileCreator.FILE, "a", encoding="utf-8", newline="") as CSV_file:
             writer = csv.writer(CSV_file, delimiter=",")
-            writer.writerow(product_datas)  # Écrire les données du produit
+            writer.writerow(book_datas)  # Écrire les données du produit
 
         logging.info(f"Le livre {book_title} a été ajouté au fichier {FileCreator.FILE.replace("output/", "")}")

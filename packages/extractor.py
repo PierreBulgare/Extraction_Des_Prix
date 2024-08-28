@@ -102,7 +102,7 @@ class Extractor:
     def extract_image_url(soup, title)-> str:
         # Extraction de l'url de l'image du produit
         try:
-            return soup.find("img", alt=title)["src"].replace("../../", "https://books.toscrape.com/")
+            return soup.find("img", alt=title)["src"].replace("../../", BTS_URL)
         except:
             logging.error("Impossible de récupérer l'url de l'image du livre.")
             return "Url inconnu"
